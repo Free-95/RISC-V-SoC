@@ -1,0 +1,15 @@
+// --- ASSEMBLY ---
+00: lui  x1, 0x40000     // x1 = 0x4000_0000 (Base address of APB Timer)
+04: addi x2, x0, 10      // x2 = 10 (Countdown value)
+08: sw   x2, 4(x1)       // TIMER_LOAD (0x4000_0004) = 10
+0C: addi x3, x0, 1       // x3 = 1 (Enable bit)
+10: sw   x3, 0(x1)       // TIMER_CTRL (0x4000_0000) = 1 (Start Timer)
+14: jal  x0, 0           // Infinite loop (CPU waits here forever)
+
+// --- INSTRUCTIONS ---
+400000b7
+00a00113
+0020a223
+00100193
+0030a023
+0000006f

@@ -1,0 +1,39 @@
+// --- ASSEMBLY ---
+00: addi x1, x0, 5       // I-Type ALU: x1 = 5
+04: addi x2, x0, 10      // I-Type ALU: x2 = 10
+08: add  x3, x1, x2      // R-Type ALU: x3 = 5 + 10 = 15
+0C: sub  x4, x2, x1      // R-Type ALU: x4 = 10 - 5 = 5
+10: and  x5, x3, x4      // R-Type ALU: x5 = 15 & 5 = 5
+14: or   x6, x3, x4      // R-Type ALU: x6 = 15 | 5 = 15
+18: sll  x7, x3, x1      // R-Type ALU: x7 = 15 << 5 = 480
+1C: slt  x8, x1, x2      // R-Type ALU: x8 = (5 < 10) = 1
+20: lui  x9, 1           // U-Type: x9 = 0x0000_1000 (Set memory address)
+24: sw   x3, 0(x9)       // S-Type: mem[0x1000] = 15
+28: lw   x10, 0(x9)      // I-Type Load: x10 = mem[0x1000] = 15
+2C: auipc x12, 2         // U-Type: x12 = PC(0x2C) + (2 << 12) = 0x202C
+30: beq  x3, x10, 8      // B-Type: If x3==x10 (15==15), PC += 8 (Jumps over LOOP 1)
+34: jal  x0, 0           // <LOOP 1> (Traps here if BEQ fails)
+38: jal  x11, 12         // J-Type: x11 = PC(0x38)+4 = 0x3C, PC += 12 (Jumps over LOOP 2 & SUCCESS LOOP to 0x44)
+3C: jal  x0, 0           // <LOOP 2>
+40: jal  x0, 0           // <SUCCESS LOOP> (Test passed if it gets here)
+44: jalr x0, x11, 4      // I-Type Jump: PC = x11(0x3C) + 4 = 0x40 (Jumps to SUCCESS LOOP)
+
+// --- INSTRUCTIONS ---
+00500093
+00a00113
+002081b3
+40110233
+0041f2b3
+0041e333
+001193b3
+0020a433
+000014b7
+0034a023
+0004a503
+00002617
+00a18463
+0000006f
+00c005ef
+0000006f
+0000006f
+00458067

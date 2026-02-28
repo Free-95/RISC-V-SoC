@@ -17,7 +17,7 @@ module RiscV(
     wire [1:0]  resultsrc,alusrc;
     wire [3:0]  alucontrol;
     
-    assign ReadData = readdata;
+    assign readdata  = ReadData;
     assign MemWrite  = (Ext_MemWrite && rst) ? 1 : WEM;
     assign WriteData = (Ext_MemWrite && rst) ? Ext_WriteData : RD2;
     assign DataAdr   = rst ? Ext_DataAdr : aluresult;
