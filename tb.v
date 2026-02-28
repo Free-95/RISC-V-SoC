@@ -1,11 +1,13 @@
 `timescale 1ns / 1ps
 
 module testbench;
-    reg RESET;
+    reg clk;
+    reg rst_n;
     wire intr;    
 
     soc uut (
-        .RESET(RESET),
+        .clk(clk),
+        .rst_n(rst_n),
         .timer_interrupt(intr)
     );
 
@@ -14,11 +16,11 @@ module testbench;
         $dumpvars(0, testbench);
 
         // Init
-        RESET = 0;
+        rst_n = 1;
 
         // Reset Pulse
-        #100 RESET = 1;
-        #100 RESET = 0; 
+        #100 rst_n = 0;
+        #100 rst_n = 1; 
 
         #1000000000;
         $finish;
