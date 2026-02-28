@@ -1,7 +1,8 @@
 `timescale 1ns / 1ps
 
 module soc (
-    input RESET, // Active High (matches RiscV.v)
+    input clk,
+    input rst_n, 
     output timer_interrupt
 );
 
@@ -12,34 +13,8 @@ module soc (
     wire        MemWrite, Stall_Core;
     wire [1:0]  ResultSrc;
     wire [2:0]  funct3;
-    
-    // Reset inversion for Peripherals (usually Active Low)
-    wire rst_n; 
-    wire clk_int;
-    wire clk;
 
-    // ---------------------------------
-    // 12 MHz clock
-    // ---------------------------------
-    SB_HFOSC hfosc (
-       .CLKHFPU(1'b1),
-       .CLKHFEN(1'b1),
-       .CLKHF(clk_int)
-    );
-
-    // -------------------------------------
-    // Gearbox and reset circuitry
-    // -------------------------------------
-    Clockworks CW(
-      .CLK(clk_int),
-      .RESET(RESET),
-      .clk(clk),
-      .resetn(rst_n)
-    );
-
-    // ---------------------------------------------------------
-    // 1. RISC-V Core (Modified to support Stall & Ext Memory)
-    // ---------------------------------------------------------
+    // 1. RISC-V Core 
     RiscV core (
         .clk(clk),
         .rst(~rst_n),
@@ -49,28 +24,24 @@ module soc (
         .MemWrite(MemWrite),
         .WriteData(WriteData),
         .DataAdr(DataAdr),
-        .ReadData(ReadData_Core), // INPUT now
-        .ResultSrcOut(ResultSrc), // OUTPUT (New)
-        .Stall(Stall_Core),       // INPUT (New)
+        .ReadData(ReadData_Core), 
+        .ResultSrcOut(ResultSrc), 
+        .Stall(Stall_Core),       
         .funct3(funct3)
     );
 
-    // ---------------------------------------------------------
     // 2. Data Memory (RAM)
-    // ---------------------------------------------------------
     // We assume 0x0000_0000 to 0x3FFF_FFFF is RAM
     data_mem dmem (
         .clk(clk),
-        .WE(MemWrite & (DataAdr[31:16] != 16'h4000)), // Don't write to RAM if addr is 0x4000...
-        .funct3(funct3), // Default to Word (SW) or pass funct3 from core if exposed
+        .WE(MemWrite & (DataAdr[31:16] != 16'h4000)), // Don't write to RAM if addr is 0x4000_xxxx
+        .funct3(funct3), 
         .A(DataAdr),
         .WD(WriteData),
         .RD(ReadData_RAM)
     );
 
-    // ---------------------------------------------------------
-    // 3. APB Bridge (Handles 0x4000_XXXX addresses)
-    // ---------------------------------------------------------
+    // 3. APB Bridge (Handles 0x4000_xxxx addresses)
     wire        p_sel, p_enable, p_write, p_ready;
     wire [31:0] p_addr, p_wdata, p_rdata;
 
@@ -82,17 +53,13 @@ module soc (
         .rv_mem_read(ResultSrc == 2'b01), // 01 is Load Instruction
         .rv_rdata(ReadData_APB),
         .cpu_stall(Stall_Core),
-        // APB Side
+        // APB Nets
         .PSEL(p_sel), .PENABLE(p_enable), .PWRITE(p_write),
         .PADDR(p_addr), .PWDATA(p_wdata), .PRDATA(p_rdata), .PREADY(p_ready)
     );
 
-    // ---------------------------------------------------------
     // 4. Peripherals (System Timer)
-    // ---------------------------------------------------------
-    // Address Decoding (Simple: If Bridge Selects, and Addr matches Timer Base)
-    // Let's say Timer is at 0x4000_0000
-    wire sel_timer = p_sel && (p_addr[15:8] == 8'h00); 
+    wire sel_timer = p_sel && (p_addr[15:8] == 8'h00); // Address Decoding (Timer base address: 0x4000_0000)
     
     system_timer timer0 (
         .PCLK(clk),
@@ -102,15 +69,13 @@ module soc (
         .PWRITE(p_write),
         .PADDR(p_addr[3:0]),
         .PWDATA(p_wdata),
-        .PRDATA(p_rdata), // In a real SoC, you'd Mux PRDATA from multiple slaves
+        .PRDATA(p_rdata), 
         .PREADY(p_ready),
         .INTR(timer_interrupt)
     );
 
-    // ---------------------------------------------------------
-    // 5. Read Data Mux (Return correct data to Core)
-    // ---------------------------------------------------------
-    // If address is peripheral range (0x4000...), use APB data, else RAM data
+    // 5. Read Data Mux 
+    // If address is peripheral range (0x4000_xxxx), use APB data, else RAM data
     assign ReadData_Core = (DataAdr[31:16] == 16'h4000) ? ReadData_APB : ReadData_RAM;
 
 endmodule
