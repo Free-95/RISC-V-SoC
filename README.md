@@ -32,7 +32,7 @@ This project is tested using raw machine code instructions loaded into the instr
 
 You will need an HDL simulator to compile and run the Verilog code. I use **Icarus Verilog (`iverilog`)**.
 
-* [Download Icarus Verilog](https://steveicarus.github.io/iverilog/)
+* [Download Icarus Verilog](https://bleyer.org/icarus/)
 
 ### Test 1: RISC-V Core Verification
 
@@ -91,4 +91,4 @@ vvp timer
 
 ### 📊 Viewing Waveforms
 
-Both testbenches automatically generate `.vcd` files (`core_waveform.vcd` and `timer_waveform.vcd`). You can open these files using [GTKWave](https://gtkwave.sourceforge.net/) to inspect the clock cycles, APB bus transactions, and CPU registers.
+Both testbenches automatically generate `.vcd` files (`core_waveform.vcd` and `timer_waveform.vcd`). You can open these files using GTKWave to inspect the clock cycles, APB bus transactions, and CPU registers.
