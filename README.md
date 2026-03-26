@@ -4,7 +4,7 @@ A custom 32-bit RISC-V System-on-Chip (SoC) designed from scratch in Verilog. Th
 
 > **🚧 WORK IN PROGRESS 🚧**
 >
-> Please note that this project is currently under development. While the core processing unit and the APB timer peripheral are fully functional, the SoC is not yet complete.
+> Please note that this project is currently under development. While the core Single-cycle RISC-V processor and the APB timer peripheral are fully functional, the SoC is not yet complete.
 >
 > **Upcoming Features to be added:**
 > * **PWM (Pulse Width Modulation) Controller**
